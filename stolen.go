@@ -33,6 +33,21 @@ const (
 	directory64EndSignature  = 0x06064b50
 	dataDescriptorSignature  = 0x08074b50 // de-facto standard; required by OS X Finder
 	fileHeaderLen            = 30         // + filename + extra
+
+	// Extra header IDs.
+	//
+	// IDs 0..31 are reserved for official use by PKWARE.
+	// IDs above that range are defined by third-party vendors.
+	// Since ZIP lacked high precision timestamps (nor a official specification
+	// of the timezone used for the date fields), many competing extra fields
+	// have been invented. Pervasive use effectively makes them "official".
+	//
+	// See http://mdfs.net/Docs/Comp/Archiving/Zip/ExtraField
+	zip64ExtraID       = 0x0001 // Zip64 extended information
+	ntfsExtraID        = 0x000a // NTFS
+	unixExtraID        = 0x000d // UNIX
+	extTimeExtraID     = 0x5455 // Extended timestamp
+	infoZipUnixExtraID = 0x5855 // Info-ZIP Unix extension
 )
 
 // msDosTimeToTime converts an MS-DOS date and time into a time.Time.

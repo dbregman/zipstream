@@ -18,7 +18,6 @@ func TestReader(t *testing.T) {
 }
 
 func testReader(t *testing.T, s []byte) {
-
 	var wbuf bytes.Buffer
 	for j := 0; j < 2; j++ {
 		z := zip.NewWriter(&wbuf)

@@ -28,9 +28,13 @@ func discardCentralDirectory(br *bufio.Reader) error {
 			}
 			return io.EOF
 		case directory64EndSignature:
-			return errors.New("Zip64 not yet supported")
-		case directory64LocSignature: // Not sure what this is yet
-			return errors.New("Zip64 not yet supported")
+			if err := discardDirectory64End(br); err != nil {
+				return err
+			}
+		case directory64LocSignature:
+			if err := discardDirectory64EndLocator(br); err != nil {
+				return err
+			}
 		default:
 			return zip.ErrFormat
 		}
@@ -38,7 +42,6 @@ func discardCentralDirectory(br *bufio.Reader) error {
 }
 
 func discardDirectoryHeaderRecord(br *bufio.Reader) error {
-
 	if _, err := br.Discard(28); err != nil {
 		return err
 	}
@@ -62,5 +65,23 @@ func discardDirectoryEndRecord(br *bufio.Reader) error {
 		return err
 	}
 	_, err = br.Discard(2 + int(binary.LittleEndian.Uint16(commentLength)))
+	return err
+}
+
+func discardDirectory64End(br *bufio.Reader) error {
+	lb, err := br.Peek(12)
+	if err != nil {
+		return err
+	}
+	totalSize := 12 + binary.LittleEndian.Uint64(lb[4:])
+	if totalSize > 0x7FFFFFFF {
+		return errors.New("discardDirectory64End: size overflow")
+	}
+	_, err = br.Discard(int(totalSize))
+	return err
+}
+
+func discardDirectory64EndLocator(br *bufio.Reader) error {
+	_, err := br.Discard(20)
 	return err
 }
